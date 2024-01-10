@@ -2,6 +2,35 @@ import tkinter as tk
 import tkinter.font as font
 from PIL import Image, ImageTk, ImageDraw
 
+## tmp add detection here before packaging
+
+import torch
+from torch import nn
+from torchvision import transforms
+
+
+class NeuralNetwork(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.flatten = nn.Flatten()
+        self.linear_relu_stack = nn.Sequential(
+            nn.Linear(28 * 28, 128),
+            nn.ReLU(),
+            nn.Linear(128, 128),
+            nn.ReLU(),
+            nn.Linear(128, 10)
+        )
+
+    def forward(self, x):
+        x = self.flatten(x)
+        logits = self.linear_relu_stack(x)
+        return logits
+
+
+model = torch.load('model.pth')
+model.eval()
+
+## GUI
 
 class MyWindow:
     def __init__(self, root):
@@ -12,6 +41,11 @@ class MyWindow:
         self.canvas = tk.Canvas(root, width=400, height=400)
         self.imageContainer = self.canvas.create_image(0, 0, anchor="nw",
                                                        image=self.tkImage)
+        self.digit = tk.StringVar()
+        self.digit.set('Detected digit: ?')
+        self.label = tk.Label(root, textvariable=self.digit) #, relief=RAISED )
+        self.label['font'] = font.Font(size=30) 
+        
         self.line = []
         self.canvas.bind("<Button-1>", self.initLine)
         self.canvas.bind("<B1-Motion>", self.drawLine)
@@ -25,13 +59,14 @@ class MyWindow:
                                       command=self.detect)
         self.detectButton['font'] = font.Font(size=30)
 
+        self.label.pack()
         self.canvas.pack()
         self.clearButton.pack()  # side='left'
         self.detectButton.pack()
 
     def initLine(self, event):
         self.line = [(self.canvas.canvasx(event.x),
-                         self.canvas.canvasy(event.y))]
+                      self.canvas.canvasy(event.y))]
 
     def drawLine(self, event):
         x, y = self.canvas.canvasx(event.x), self.canvas.canvasy(event.y)
@@ -47,10 +82,17 @@ class MyWindow:
         self.draw = ImageDraw.Draw(self.image)
         self.tkImage = ImageTk.PhotoImage(self.image)
         self.canvas.itemconfig(self.imageContainer, image=self.tkImage)
+        self.digit.set('Detected digit: ?')  
 
     def detect(self):
-        self.image.save('test.png')
-
+        #self.image.save('test.png')
+        im_28_28 = self.image.resize((28, 28))
+        X = transforms.ToTensor()(im_28_28) # this also does the 0 - 1 scaling
+        y_pred = model(X)
+        #print(y_pred)
+        ind_max = y_pred.argmax()
+        #print(f'Detected a {ind_max}')
+        self.digit.set(f'Detected digit: {ind_max}')
     # def doneStroke(self, event):
     #   pass
 
