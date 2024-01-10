@@ -110,10 +110,13 @@ def test_loop(X_test, y_test, model, loss_fn):
 
 
 # Training loop
-n_epoch = 80
+#n_epoch = 80
+n_epoch = 20
 for epoch in range(n_epoch):
     print(f'Epoch #{epoch + 1}:')
     train_loop(X, y, model, loss_fn, optimizer)
     test_loop(X_test, y_test, model, loss_fn)
 
 print('Done!')
+torch.save(model, 'model.pth')
+#torch.save(model.state_dict(), 'model_weights.pth')
