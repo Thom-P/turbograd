@@ -111,7 +111,7 @@ def test_loop(X_test, y_test, model, loss_fn):
 
 # Training loop
 #n_epoch = 80
-n_epoch = 20
+n_epoch = 80
 for epoch in range(n_epoch):
     print(f'Epoch #{epoch + 1}:')
     train_loop(X, y, model, loss_fn, optimizer)
