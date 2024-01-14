@@ -2,10 +2,13 @@ import torch
 from torch import nn
 from torchvision import datasets, transforms
 import sys
-# import matplotlib.pyplot as plt
+import numpy as np
+import matplotlib.pyplot as plt
 # mnist_raw_train = torchvision.datasets.MNIST(root='dataset', train=True, transform=np.asarray, download=True)
 # mnist_raw_test = torchvision.datasets.MNIST(root='dataset', train=False, transform=np.asarray, download=True)
 
+'''
+# loading mnist using pytorch
 mnist_raw_train = datasets.MNIST(root='../MNIST_dataset',
                                  train=True,
                                  transform=transforms.ToTensor(),
@@ -18,19 +21,77 @@ n_train = len(mnist_raw_train)  # 60_000
 n_test = len(mnist_raw_test)  # 10_000
 batch_size = 500  # use a divisor of n_train and n_test
 
+print(mnist_raw_train.data.shape)
+print(mnist_raw_train.data[0])
 X = mnist_raw_train.data.reshape([-1, batch_size, 28, 28]) / 255  # normalize
-# X = mnist_raw_train.data / 255  # normalize
-print(X.shape)
-print(X.dtype)
-# im_arr = X[50].numpy()
-# plt.imshow(im_arr)
-
 y = mnist_raw_train.targets.reshape([-1, batch_size])
 print(y.shape)
 print(y.dtype)
 
 X_test = mnist_raw_test.data.reshape([-1, batch_size, 28, 28]) / 255  # normalize
 y_test = mnist_raw_test.targets.reshape([-1, batch_size])
+'''
+
+# loading MNIST fron bin files directly
+with open('../MNIST_dataset/MNIST/raw/train-images-idx3-ubyte', 'rb') as f:
+    train_images_buf = f.read()
+with open('../MNIST_dataset/MNIST/raw/train-labels-idx1-ubyte', 'rb') as f:
+    train_labels_buf = f.read()
+with open('../MNIST_dataset/MNIST/raw/t10k-images-idx3-ubyte', 'rb') as f:
+    test_images_buf = f.read()
+with open('../MNIST_dataset/MNIST/raw/t10k-labels-idx1-ubyte', 'rb') as f:
+    test_labels_buf = f.read()
+
+#  header = np.frombuffer(train_images_buf, dtype='>i4', count=4, offset=0)
+#  could put asserts here
+
+n_train = 60_000
+n_test = 10_000
+batch_size = 500  # use a divisor of n_train and n_test
+
+# 4 int32 header (16 bytes): magic num=2051, n_image=60_000, n_row=28, n_col=28
+mnist_train_images = np.frombuffer(train_images_buf,
+                                   dtype='B',
+                                   count=28 * 28 * n_train,
+                                   offset=16).reshape(n_train, 28, 28)
+# 2 int32 header (8 bytes): magic number 2049, nb_items=60_000
+mnist_train_labels = np.frombuffer(train_labels_buf,
+                                   dtype='B',
+                                   count=n_train,
+                                   offset=8)
+
+X = mnist_train_images.reshape([-1, batch_size, 28, 28]).astype('float32') / 255  # normalize
+y = mnist_train_labels.reshape([-1, batch_size])
+X = torch.from_numpy(X.copy())
+y = torch.from_numpy(y.copy())
+
+# same for test set (n = 10_000)
+mnist_test_images = np.frombuffer(test_images_buf,
+                                  dtype='B',
+                                  count=28 * 28 * n_test,
+                                  offset=16).reshape(n_test, 28, 28)
+mnist_test_labels = np.frombuffer(test_labels_buf,
+                                  dtype='B',
+                                  count=n_test,
+                                  offset=8)
+
+X_test = mnist_test_images.reshape([-1, batch_size, 28, 28]).astype('float32') / 255  # normalize
+y_test = mnist_test_labels.reshape([-1, batch_size])
+X_test = torch.from_numpy(X_test.copy())
+y_test = torch.from_numpy(y_test.copy())
+
+# print(X.shape)
+# print(X.dtype)
+# print(X_test.dtype)
+# print(X_test.shape)
+# print(y.shape)
+# print(y.dtype)
+# print(y_test.shape)
+# print(y_test.dtype)
+
+
+# plt.imshow(X[0, 0])
+# plt.show()
 
 
 # ***************** Define model
@@ -68,8 +129,10 @@ loss_fn = nn.CrossEntropyLoss()
 optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate) 
 
 # Training
-# Set the model to training mode - important for batch normalization and dropout layers
+# Set the model to training mode - important for batch normalization
+# and dropout layers
 # Unnecessary in this situation but added for best practices
+
 
 def train_loop(X, y, model, loss_fn, optimizer):
     n_batch = y.shape[0]
@@ -118,5 +181,6 @@ for epoch in range(n_epoch):
     test_loop(X_test, y_test, model, loss_fn)
 
 print('Done!')
-torch.save(model, 'model.pth')
-#torch.save(model.state_dict(), 'model_weights.pth')
+torch.save(model, 'model2.pth')
+
+# torch.save(model.state_dict(), 'model_weights.pth')

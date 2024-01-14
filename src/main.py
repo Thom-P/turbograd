@@ -28,7 +28,7 @@ class NeuralNetwork(nn.Module):
         return logits
 
 
-model = torch.load('model.pth')
+model = torch.load('model2.pth')
 model.eval()
 
 
