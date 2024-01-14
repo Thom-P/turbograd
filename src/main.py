@@ -60,21 +60,24 @@ def preprocess_image(raw_image):
 
     im_norm = Image.fromarray(arr_norm, mode='L')
     im_20 = im_norm.resize((20, 20))  # downsample to 20x20 and get corresp. array
-    #arr_20 = np.array(im_20)
     
-    im_28 = ImageOps.expand(im_20, border=4, fill=0)
-
-    '''
+    
+    #im_28 = ImageOps.expand(im_20, border=4, fill=0)
+ 
     # compute center of mass (cm) of pixels
-    x_cm, y_cm = (np.mgrid[0:20, 0:20] * arr_20).sum(1).sum(1) / arr_20.sum()
-    row_cm, col_cm = int(y_cm), int(x_cm)
+    arr_20 = np.array(im_20)
+    #x_cm, y_cm = (np.mgrid[0:20, 0:20] * arr_20).sum(1).sum(1) / arr_20.sum() # inverted axes, was this the bug?
+    y_cm, x_cm = (np.mgrid[0:20, 0:20] * arr_20).sum(1).sum(1) / arr_20.sum()
+    #row_cm, col_cm = int(y_cm), int(x_cm)
+    row_cm, col_cm = round(y_cm), round(x_cm)
+    
     #print(row_cm, col_cm)
 
     arr_40 = np.zeros((40, 40), dtype='uint8')  # double size to include 20x20 array centered on cm
-    arr_40[20 - row_cm:20 - row_cm + 20, 20 - col_cm:20 - col_cm + 20] = arr_20
-    im_28 = Image.fromarray(arr_40[(40 - 28) // 2:(40 - 28) // 2 + 28, (40 - 28) // 2:(40 - 28) // 2 + 28], mode='L')
-    #im_28.show()
-    '''
+    arr_40[20 - row_cm:20 - row_cm + 20, 20 - col_cm:20 - col_cm + 20] = arr_20 # cm is as ind 20, 20 in arr40
+    im_28 = Image.fromarray(arr_40[(40 - 28) // 2:(40 - 28) // 2 + 28, (40 - 28) // 2:(40 - 28) // 2 + 28], mode='L') # cm at ind 14 in im28
+    #im_28.save('debug_cm.png')
+    
     return im_28
 
 ## GUI
