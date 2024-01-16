@@ -16,7 +16,8 @@ class nn(ABC):
 
 class Neuron(nn):
     def __init__(self, n_input, relu=True):
-        self.W = [tp.Scalar(random.gauss(mu=0, sigma=2 / n_input)) for _ in range(n_input)]
+        self.W = [tp.Scalar(random.gauss(mu=0, sigma=2 / n_input))
+                  for _ in range(n_input)]
         self.b = tp.Scalar(0)
         self.relu = relu
 
@@ -28,9 +29,50 @@ class Neuron(nn):
         return self.W + [self.b]
 
     def __repr__(self):
-        return f'{"Relu" if self.relu else "Linear"} Neuron with {len(self.W)} weights'
+        neur_type = "Relu" if self.relu else "Linear"
+        return f'{neur_type} neuron with {len(self.W)} weights'
 
-n = Neuron(10, relu=True)
-x = list(range(1, 11))
-a = n(x)
-print(a)
+
+# Dense Layer (Linear + optional ReLU)
+class Dense(nn):
+    def __init__(self, n_in, n_out, relu=True):
+        self.neurons = [Neuron(n_in, relu=relu) for _ in range(n_out)]
+
+    def __call__(self, x):
+        return [neuron(x) for neuron in self.neurons]
+
+    def parameters(self):
+        return [p for neuron in self.neurons for p in neuron.parameters()]
+
+
+class Sequential(nn):
+    def __init__(self, layers):
+        self.layers = layers
+
+    def __call__(self, x):
+        for layer in self.layers:
+            x = layer(x)
+        return x
+
+    def parameters(self):
+        return [p for layer in self.layers for p in layer.parameters()]
+
+
+# n = Neuron(10, relu=True)
+# x = list(range(1, 11))
+# a = n(x)
+# print(n.parameters())
+
+# layer = Dense(4, 2)
+# print(layer.parameters())
+# print(layer(range(1, 11)))
+
+# layers = [Dense(20, 10), Dense(10, 5), Dense(5, 2, relu=False)]
+x = [random.random() for _ in range(20)]
+model = Sequential([
+    Dense(20, 10),
+    Dense(10, 5),
+    Dense(5, 2, relu=False)
+    ])
+print(model.parameters())
+print(model(x))

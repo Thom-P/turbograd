@@ -1,24 +1,23 @@
 # import numpy as np
-
-# Build an auto backprop package from Numpy, following and extending on the tinygrad tutorial by A. Karpathy 
+# Build an auto backprop package from Numpy,
+# following and extending on the tinygrad tutorial by A. Karpathy
 
 
 class Scalar:
-    def __init__(self, value, _prev=(), _op=None):
+    def __init__(self, value, _prev=()):
         self.value = value
         self.grad = 0
 
         # for auto backprop
         self._prev = _prev
-        self._op = _op
         self._backward = lambda: None
 
     def __repr__(self):
-        return f'Scalar({self.value})'
+        return f'Scalar({self.value}), grad={self.gard}'
 
     def __add__(self, other):
         other = other if isinstance(other, Scalar) else Scalar(other)
-        res = Scalar(self.value + other.value, _prev=(self, other), _op='+')
+        res = Scalar(self.value + other.value, _prev=(self, other))
 
         def _backward():
             self.grad += res.grad
@@ -27,11 +26,11 @@ class Scalar:
         return res
 
     def __radd__(self, other):
-        return self + other    
+        return self + other
 
     def __mul__(self, other):
         other = other if isinstance(other, Scalar) else Scalar(other)
-        res = Scalar(self.value * other.value, _prev=(self, other), _op='*')
+        res = Scalar(self.value * other.value, _prev=(self, other))
 
         def _backward():
             self.grad += res.grad * other.value
@@ -40,7 +39,7 @@ class Scalar:
         return res
 
     def relu(self):
-        res = Scalar(max(0, self.value), _prev=(self,), _op='relu')
+        res = Scalar(max(0, self.value), _prev=(self,))
 
         def _backward():
             self.grad += res.grad * (1 if self.value >= 0 else 0)
@@ -49,7 +48,8 @@ class Scalar:
 
     def backward(self):
         self.grad = 1
-        # dfs build of topological order of nodes
+
+        # DFS build of topological order of nodes
         visited = set()
         topo = []
 
@@ -63,9 +63,9 @@ class Scalar:
         build_topo(self)
 
         # backprop of grad to all _prev variables in reverse topological order
-        print(topo)
         for node in reversed(topo):
             node._backward()
+
 
 ''''
 a = Scalar(5.0)
