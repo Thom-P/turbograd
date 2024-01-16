@@ -11,16 +11,7 @@ from torch import nn
 
 
 class NeuralNetwork(nn.Module):
-    def __init__(self):
-        super().__init__()
-        self.flatten = nn.Flatten()
-        self.linear_relu_stack = nn.Sequential(
-            nn.Linear(28 * 28, 128),
-            nn.ReLU(),
-            nn.Linear(128, 128),
-            nn.ReLU(),
-            nn.Linear(128, 10)
-        )
+    # no need to put detailed architecture here
 
     def forward(self, x):
         x = self.flatten(x)
@@ -28,7 +19,8 @@ class NeuralNetwork(nn.Module):
         return logits
 
 
-model = torch.load('model2.pth')
+# model = torch.load('model2.pth')
+model = torch.load('model_1hid_layer_16.pth')
 model.eval()
 
 

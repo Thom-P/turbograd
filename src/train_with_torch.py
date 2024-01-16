@@ -105,11 +105,16 @@ class NeuralNetwork(nn.Module):
         super().__init__()
         self.flatten = nn.Flatten()
         self.linear_relu_stack = nn.Sequential(
-            nn.Linear(28 * 28, 128),
+            # nn.Linear(28 * 28, 128),
+            # nn.ReLU(),
+            # nn.Linear(128, 128),
+            # nn.ReLU(),
+            # nn.Linear(128, 10)
+
+            
+            nn.Linear(28 * 28, 16),
             nn.ReLU(),
-            nn.Linear(128, 128),
-            nn.ReLU(),
-            nn.Linear(128, 10)
+            nn.Linear(16, 10)
         )
 
     def forward(self, x):
@@ -181,6 +186,6 @@ for epoch in range(n_epoch):
     test_loop(X_test, y_test, model, loss_fn)
 
 print('Done!')
-torch.save(model, 'model2.pth')
+torch.save(model, 'model_1hid_layer_16.pth')
 
 # torch.save(model.state_dict(), 'model_weights.pth')
