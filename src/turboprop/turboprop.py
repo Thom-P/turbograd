@@ -1,6 +1,7 @@
 # import numpy as np
 # Build an auto backprop package from Numpy,
 # following and extending on the tinygrad tutorial by A. Karpathy
+import math
 
 
 class Scalar:
@@ -13,7 +14,7 @@ class Scalar:
         self._backward = lambda: None
 
     def __repr__(self):
-        return f'Scalar({self.value}), grad={self.gard}'
+        return f'Scalar({self.value}), grad={self.grad}'
 
     def __add__(self, other):
         other = other if isinstance(other, Scalar) else Scalar(other)
@@ -28,6 +29,9 @@ class Scalar:
     def __radd__(self, other):
         return self + other
 
+    def __sub__(self, other):
+        return self + (-other)
+
     def __mul__(self, other):
         other = other if isinstance(other, Scalar) else Scalar(other)
         res = Scalar(self.value * other.value, _prev=(self, other))
@@ -35,6 +39,28 @@ class Scalar:
         def _backward():
             self.grad += res.grad * other.value
             other.grad += res.grad * self.value
+        res._backward = _backward
+        return res
+
+    def __neg__(self):
+        return self * -1
+
+    def __pow__(self, pow):
+        res = Scalar(self.value ** pow, _prev=(self,))
+
+        def _backward():
+            self.grad += res.grad * pow * (self.value ** (pow - 1))
+        res._backward = _backward
+        return res
+
+    def __truediv__(self, other):
+        return self * (other ** -1)
+
+    def log(self):
+        res = Scalar(math.log(self.value), _prev=(self,))
+
+        def _backward():
+            self.grad += res.grad / self.value
         res._backward = _backward
         return res
 

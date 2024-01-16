@@ -10,7 +10,7 @@ class nn(ABC):
 
     # reset gradients to zeros (to do after each gradient descent step)
     def zero_grad(self):
-        for p in self.parameters:
+        for p in self.parameters():
             p.grad = 0
 
 
@@ -68,6 +68,7 @@ class Sequential(nn):
 # print(layer(range(1, 11)))
 
 # layers = [Dense(20, 10), Dense(10, 5), Dense(5, 2, relu=False)]
+'''
 x = [random.random() for _ in range(20)]
 model = Sequential([
     Dense(20, 10),
@@ -76,3 +77,4 @@ model = Sequential([
     ])
 print(model.parameters())
 print(model(x))
+'''
