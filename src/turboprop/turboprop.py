@@ -17,6 +17,7 @@ class Scalar:
         return f'Scalar({self.value})'
 
     def __add__(self, other):
+        other = other if isinstance(other, Scalar) else Scalar(other)
         res = Scalar(self.value + other.value, _prev=(self, other), _op='+')
 
         def _backward():
@@ -25,12 +26,24 @@ class Scalar:
         res._backward = _backward
         return res
 
+    def __radd__(self, other):
+        return self + other    
+
     def __mul__(self, other):
+        other = other if isinstance(other, Scalar) else Scalar(other)
         res = Scalar(self.value * other.value, _prev=(self, other), _op='*')
 
         def _backward():
             self.grad += res.grad * other.value
             other.grad += res.grad * self.value
+        res._backward = _backward
+        return res
+
+    def relu(self):
+        res = Scalar(max(0, self.value), _prev=(self,), _op='relu')
+
+        def _backward():
+            self.grad += res.grad * (1 if self.value >= 0 else 0)
         res._backward = _backward
         return res
 

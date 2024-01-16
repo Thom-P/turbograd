@@ -1,11 +1,10 @@
 import turboprop as tp
-#from abc import ABC, abstractmethod
+from abc import ABC, abstractmethod
 import random
 
 
-#class nn(ABC):
-class nn:
-    #@abstractmethod
+class nn(ABC):
+    @abstractmethod
     def parameters(self):
         pass
 
@@ -21,15 +20,17 @@ class Neuron(nn):
         self.b = tp.Scalar(0)
         self.relu = relu
 
-        def __call__(self, x):
-            z = self.b + sum(wi * xi for wi, xi in zip(self.W, x))
-            return z.relu() if self.relu else z
+    def __call__(self, x):
+        z = self.b + sum(wi * xi for wi, xi in zip(self.W, x))
+        return z.relu() if self.relu else z
 
-        def parameters(self):
-            return self.W + [self.b]
+    def parameters(self):
+        return self.W + [self.b]
 
-        def __repr__(self):
-            return f'{"Relu" if self.relu else "Linear"} Neuron with {len(self.W)} weights'
+    def __repr__(self):
+        return f'{"Relu" if self.relu else "Linear"} Neuron with {len(self.W)} weights'
 
-n = Neuron(10)
-print(n)
+n = Neuron(10, relu=True)
+x = list(range(1, 11))
+a = n(x)
+print(a)
