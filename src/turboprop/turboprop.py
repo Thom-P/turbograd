@@ -1,8 +1,8 @@
 # import numpy as np
 # Build an auto backprop package from Numpy,
-# following and extending on the tinygrad tutorial by A. Karpathy
+# following (class Scalar) and extending (class Tensor) on the tinygrad tutorial by A. Karpathy
 import math
-
+import numpy as np
 
 class Scalar:
     def __init__(self, value, _prev=()):
@@ -114,3 +114,26 @@ print(c.grad)
 print(d.grad)
 print(e.grad)
 '''
+
+
+class Tensor:
+    def __init__(self, array: np.ndarray, _prev=()):
+        assert isinstance(array, np.ndarray)
+        self.array = array
+        self.grad = np.zeros(array.shape)
+
+        # for auto backprop
+        self._prev = _prev
+        self._backward = lambda: None
+
+    def __repr__(self):
+        return f'Tensor(shape={self.array.shape}, dtype={self.array.dtype})'
+
+    def __matmul__(self, other):
+        assert isinstance(other, np.ndarray)
+        assert other.shape[0] == self.array.shape[-1]  # compatible for matmul
+        res = Tensor(self.array @ other, _prev=)
+
+test = np.random.rand(3, 4)
+arr = Tensor(test)
+print(arr)
