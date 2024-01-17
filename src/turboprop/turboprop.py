@@ -4,6 +4,7 @@
 import math
 import numpy as np
 
+
 class Scalar:
     def __init__(self, value, _prev=()):
         self.value = value
@@ -207,7 +208,7 @@ class Tensor:
     
 
 
-
+'''
 A = np.random.rand(30, 40)
 B = np.random.rand(40, 60)
 B_bad = np.random.rand(39, 60) 
@@ -227,3 +228,4 @@ expo = (-tA).exp()
 logo = tB.log()
 relo = tC1.relu()
 divo = tC1 * 3. / tC2
+'''
