@@ -166,6 +166,47 @@ class Tensor:
         res._backward = _backward
         return res
 
+    def relu(self):
+        self.array = np.maximum(0, self.array) # in place ok?
+        return self
+
+    def __mul__(self, other):
+        assert isinstance(other, float)  # limited to float atm
+        self.array = self.array * other  # no need to track op i think(?)
+        return self
+
+    def __truediv__(self, other):
+        assert isinstance(other, Tensor)
+        res = Tensor(self.array / other.array, _prev=(self, other))
+
+        def _backward():
+            self.grad = res.grad / other.array
+            other.grad = res.grad * -self.array / (other.array ** 2)
+        res._backward = _backward
+        return res
+
+    def __neg__(self):
+        self.array = -self.array  # idem
+        return self
+
+    def log(self):
+        res = Tensor(np.log(self.array), _prev=(self,))
+
+        def _backward():
+            self.grad = res.grad / self.array
+        res._backward = _backward
+        return res
+
+    def exp(self):
+        res = Tensor(np.exp(self.array), _prev=(self,))
+
+        def _backward():
+            self.grad = res.grad * np.exp(self.array)
+        res._backward = _backward
+        return res
+    
+
+
 
 A = np.random.rand(30, 40)
 B = np.random.rand(40, 60)
@@ -181,3 +222,8 @@ tC2 = Tensor(C2)
 tD = tA @ tB + tC2
 print(tD)
 
+expo = tA.exp()
+expo = (-tA).exp()
+logo = tB.log()
+relo = tC1.relu()
+divo = tC1 * 3. / tC2
