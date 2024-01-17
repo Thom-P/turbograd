@@ -118,7 +118,7 @@ print(e.grad)
 
 class Tensor:
     def __init__(self, array: np.ndarray, _prev=()):
-        assert isinstance(array, np.ndarray)
+        assert isinstance(array, np.ndarray) and array.ndim == 2
         self.array = array
         self.grad = np.zeros(array.shape)
 
@@ -130,10 +130,54 @@ class Tensor:
         return f'Tensor(shape={self.array.shape}, dtype={self.array.dtype})'
 
     def __matmul__(self, other):
-        assert isinstance(other, np.ndarray)
-        assert other.shape[0] == self.array.shape[-1]  # compatible for matmul
-        res = Tensor(self.array @ other, _prev=)
+        assert (isinstance(other, np.ndarray) and other.ndim == 2) \
+            or isinstance(other, Tensor)
+        if isinstance(other, Tensor):
+            other_arr = other.array
+            _prev = (self, other)
+        else:
+            other_arr = other
+            _prev = (self,)
+        assert other_arr.shape[0] == self.array.shape[1]  # ok for matmul
+        res = Tensor(self.array @ other_arr, _prev=_prev)
 
-test = np.random.rand(3, 4)
-arr = Tensor(test)
-print(arr)
+        def _backward():
+            self.grad += 1 / other_arr.shape[1] * \
+                res.grad @ other_arr.T
+            if isinstance(other, Tensor):
+                other.grad += 1 / self.array.shape[0] * \
+                    self.array.T @ res.grad  # need to dbl check that
+        res._backward = _backward
+        return res
+
+    def __add__(self, other):
+        assert isinstance(other, Tensor) and other.array.ndim == 2
+        assert other.array.shape == self.array.shape \
+            or other.array.shape == (self.array.shape[0], 1)
+        res = Tensor(self.array + other.array, _prev=(self, other))
+
+        def _backward():
+            self.grad += res.grad
+            if other.array.shape[1] == 1:
+                other.grad += 1 / self.array.shape[1] \
+                    * res.grad.sum(axis=1, keepdims=True)
+            else:
+                other.grad += res.grad
+        res._backward = _backward
+        return res
+
+
+A = np.random.rand(30, 40)
+B = np.random.rand(40, 60)
+B_bad = np.random.rand(39, 60) 
+C1 = np.random.rand(30, 60)  
+C2 = np.random.rand(30, 1)  
+tA = Tensor(A)
+tB = Tensor(B)
+tBb = Tensor(B_bad)
+tC1 = Tensor(C1)
+tC2 = Tensor(C2)
+
+tD = tA @ tB + tC2
+print(tD)
+
