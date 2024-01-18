@@ -4,7 +4,7 @@ import random
 import numpy as np
 
 
-class nn(ABC):
+class Module(ABC):
     @abstractmethod
     def parameters(self):
         pass
@@ -16,7 +16,7 @@ class nn(ABC):
 
 
 # Dense Layer (Linear + optional ReLU)
-class Dense(nn):
+class Dense(Module):
     def __init__(self, n_in, n_out, relu=True):
         sigma, mu = 2, 0
         self.weights = tp.Tensor(sigma * np.random.randn(n_out, n_in) + mu)
@@ -34,8 +34,29 @@ class Dense(nn):
     #    neur_type = "Relu" if self.relu else "Linear"
     #    return f'{neur_type} neuron with {len(self.W)} weights'
 
+# gradient calc: https://www.michaelpiseno.com/blog/2021/softmax-gradient/
+class CategoricalCrossEntropy():
+    # def __init__(self)
 
-class Sequential(nn):
+    def __call__(self, Z, y):
+        assert isinstance(y, np.ndarray) and y.shape == (1, Z.array.shape[1])
+        assert y.dtype == int  # expect indices
+        exp_Z = np.exp(Z.array) 
+        softmax_denom = exp_Z.sum(axis=0, keepdims=True)
+        Z_select = Z.array[y, np.arange(Z.array.shape[1])]
+        loss = (-Z_select + np.log(softmax_denom)).sum(1) # dbl check all
+        res = tp.Scalar(loss, _prev=(Z,))
+        # now backward...
+
+        def _backward():
+            softmax = exp_Z / softmax_denom
+            Z.grad = softmax  # todo
+            Z.grad[y, np.arange(Z.array.shape[1])] -= 1
+        res._backward = _backward
+        return res
+
+
+class Sequential(Module):
     def __init__(self, layers):
         self.layers = layers
 
@@ -49,11 +70,16 @@ class Sequential(nn):
 
 
 X = np.random.randn(28 * 28, 500)
+y = np.random.randint(0, 10, size=(1, 500))
 
 model = Sequential([
     Dense(28 * 28, 128),
     Dense(128, 64),
     Dense(64, 10, relu=False)
     ])
-print(model.parameters())
-print(model(X))
+#print(model.parameters())
+#print(model(X))
+Z = model(X)
+loss_fn = CategoricalCrossEntropy()
+loss = loss_fn(Z, y)
+loss.backward()
