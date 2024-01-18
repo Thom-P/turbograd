@@ -12,8 +12,9 @@ W1_tp = tp.Tensor(w1_np)
 b1_tp = tp.Tensor(b1_np) 
 Z_tp = W1_tp @ X_np + b1_tp
 #print(Z_tp.array)
-loss_tp = nnT.CrossEntropyLoss()(Z_tp, y_np)
-#print(loss_tp)
+A_tp = Z_tp.relu()
+loss_tp = nnT.CrossEntropyLoss()(A_tp, y_np)
+print(loss_tp)
 
 
 W1 = torch.tensor(w1_np, requires_grad=True)
@@ -21,16 +22,16 @@ b1 = torch.tensor(b1_np, requires_grad=True)
 X = torch.tensor(X_np)  
 Z = W1 @ X + b1
 Z.retain_grad()
+A = torch.nn.ReLU()(Z)
 y = torch.tensor(y_np.squeeze())
-loss = torch.nn.CrossEntropyLoss()(Z.T, y)
-#print(loss)
+#loss = torch.nn.CrossEntropyLoss()(Z.T, y)
+loss = torch.nn.CrossEntropyLoss()(A.T, y)
+print(loss)
 
 ## forward pb matching!
 
 ## now check grad
-print(W1_tp.grad)
 loss_tp.backward()
-print(W1_tp.grad)
 #print(Z_tp.grad.shape)
 
 loss.backward()

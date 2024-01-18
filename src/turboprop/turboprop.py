@@ -171,9 +171,15 @@ class Tensor:
         return res
 
     def relu(self):
-        self.array = np.maximum(0, self.array) # in place ok?
-        return self
+        res = Tensor(np.maximum(0, self.array), _prev=(self,))  # in place instead?
 
+        def _backward():
+            self.grad = res.grad
+            self.grad[self.array <= 0] = 0
+        res._backward = _backward
+        return res
+    
+    '''
     def __mul__(self, other):
         assert isinstance(other, float)  # limited to float atm
         self.array = self.array * other  # no need to track op i think(?)
@@ -208,9 +214,7 @@ class Tensor:
             self.grad = res.grad * np.exp(self.array)
         res._backward = _backward
         return res
-    
-
-
+    '''
 
 
 '''
