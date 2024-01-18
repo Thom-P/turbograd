@@ -48,7 +48,6 @@ class CrossEntropyLoss():
         Z_select = Z.array[y, np.arange(batch_size)]
         loss = (-Z_select + np.log(softmax_denom)).mean(axis=1)  # mean instead of sum (default on pytorch)
         res = tp.Scalar(loss, _prev=(Z,))
-        # now backward...
 
         def _backward():
             softmax = exp_Z / softmax_denom

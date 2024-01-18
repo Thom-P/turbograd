@@ -28,16 +28,24 @@ loss = torch.nn.CrossEntropyLoss()(Z.T, y)
 ## forward pb matching!
 
 ## now check grad
+print(W1_tp.grad)
 loss_tp.backward()
-print(Z_tp.grad.shape)
+print(W1_tp.grad)
+#print(Z_tp.grad.shape)
 
 loss.backward()
-print(Z.grad.shape)
+#print(Z.grad.shape)
+
 
 rel_tol = 1e-3
 with torch.no_grad():
     z_rel_err = (Z - Z_tp.array).abs() / Z.abs()
-    #print(z_rel_err)
     print(f'Are Z fwd different?: {torch.any(z_rel_err > rel_tol)}')
     zgrad_rel_err = (Z.grad - Z_tp.grad).abs() / Z.grad.abs()
     print(f'Are Z grad different?: {torch.any(zgrad_rel_err > rel_tol)}')
+
+    w1grad_rel_err = (W1.grad - W1_tp.grad).abs() / W1.grad.abs()
+    print(f'Are W1 grad different?: {torch.any(w1grad_rel_err > rel_tol)}')
+    
+    b1grad_rel_err = (b1.grad - b1_tp.grad).abs() / b1.grad.abs()
+    print(f'Are b1 grad different?: {torch.any(b1grad_rel_err > rel_tol)}')

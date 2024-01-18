@@ -143,11 +143,13 @@ class Tensor:
         res = Tensor(self.array @ other_arr, _prev=_prev)
 
         def _backward():
-            self.grad += 1 / other_arr.shape[1] * \
-                res.grad @ other_arr.T
+            #self.grad += 1 / other_arr.shape[1] * \
+            #    res.grad @ other_arr.T # why norm on coursera?
+            self.grad += res.grad @ other_arr.T
             if isinstance(other, Tensor):
-                other.grad += 1 / self.array.shape[0] * \
-                    self.array.T @ res.grad  # need to dbl check that
+                #other.grad += 1 / self.array.shape[0] * \
+                #    self.array.T @ res.grad  # why norm on coursera?
+                other.grad += self.array.T @ res.grad
         res._backward = _backward
         return res
 
@@ -160,8 +162,9 @@ class Tensor:
         def _backward():
             self.grad += res.grad
             if other.array.shape[1] == 1:
-                other.grad += 1 / self.array.shape[1] \
-                    * res.grad.sum(axis=1, keepdims=True)
+                #other.grad += 1 / self.array.shape[1] \
+                #    * res.grad.sum(axis=1, keepdims=True)
+                other.grad += res.grad.sum(axis=1, keepdims=True)
             else:
                 other.grad += res.grad
         res._backward = _backward
@@ -206,6 +209,8 @@ class Tensor:
         res._backward = _backward
         return res
     
+
+
 
 
 '''
