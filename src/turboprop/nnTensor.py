@@ -12,7 +12,7 @@ class Module(ABC):
     # reset gradients to zeros (to do after each gradient descent step)
     def zero_grad(self):
         for p in self.parameters():
-            p.grad = np.zeros(p.shape)
+            p.grad = np.zeros(p.array.shape)
 
 
 # Dense Layer (Linear + optional ReLU)
@@ -43,17 +43,20 @@ class CrossEntropyLoss():
         assert isinstance(y, np.ndarray) and y.shape == (1, Z.array.shape[1])
         assert y.dtype == int  # expect indices
         batch_size = Z.array.shape[1]
-        max_val = Z.array.max()
-        exp_Z = np.exp(Z.array - max_val)  # -max_val to avoid overflow 
+        max_vals = Z.array.max(axis=0, keepdims=True)
+        exp_Z = np.exp(Z.array - max_vals)  # -max_vals to avoid overflow 
         softmax_denom = exp_Z.sum(axis=0, keepdims=True)
-        Z_select = Z.array[y, np.arange(batch_size)] - max_val
+        Z_select = Z.array[y, np.arange(batch_size)] - max_vals
         loss = (-Z_select + np.log(softmax_denom)).mean(axis=1)  # mean instead of sum (default on pytorch)
         res = tp.Scalar(loss, _prev=(Z,))
 
         def _backward():
             softmax = exp_Z / softmax_denom
-            Z.grad = softmax / batch_size  # because mean used in fwd
-            Z.grad[y, np.arange(batch_size)] -= 1 / batch_size  # because mean used in fwd
+            Z.grad = softmax
+            Z.grad[y, np.arange(batch_size)] -= 1
+            Z.grad /= batch_size  # because mean used in fwd
+            #Z.grad = softmax / batch_size  # because mean used in fwd
+            #Z.grad[y, np.arange(batch_size)] -= 1. / batch_size  # because mean used in fwd
         res._backward = _backward
         return res
 

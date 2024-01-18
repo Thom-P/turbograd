@@ -3,11 +3,11 @@ import nnTensor as nnT
 import numpy as np
 import torch
 
-w1_np = np.random.randn(128, 8 * 8).astype(np.float32)
+w1_np = np.random.randn(128, 28 * 28).astype(np.float32)
 b1_np = np.random.randn(128, 1).astype(np.float32)
 w2_np = np.random.randn(10, 128).astype(np.float32)
 b2_np = np.random.randn(10, 1).astype(np.float32)
-X_np = np.random.randn(8 * 8, 500).astype(np.float32)
+X_np = np.random.randn(28 * 28, 500).astype(np.float32)
 y_np = np.random.randint(0, 10, (1, 500))
 
 W1_tp = tp.Tensor(w1_np)
@@ -19,6 +19,7 @@ b2_tp = tp.Tensor(b2_np)
 Z2_tp = W2_tp @ A1_tp + b2_tp
 
 loss_tp = nnT.CrossEntropyLoss()(Z2_tp, y_np)
+
 print(loss_tp)
 
 
@@ -66,3 +67,7 @@ with torch.no_grad():
     print(f'Are W2 grad different?: {torch.any(w2grad_rel_err > rel_tol)}')
     b2grad_rel_err = (b2.grad - b2_tp.grad).abs() / b2.grad.abs()
     print(f'Are b2 grad different?: {torch.any(b2grad_rel_err > rel_tol)}')
+
+    print(Z2.grad[z2grad_rel_err > rel_tol])
+    print(Z2_tp.grad[z2grad_rel_err > rel_tol])
+# still some small diffs here and there but probably not important
