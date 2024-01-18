@@ -34,24 +34,26 @@ class Dense(Module):
     #    neur_type = "Relu" if self.relu else "Linear"
     #    return f'{neur_type} neuron with {len(self.W)} weights'
 
+
 # gradient calc: https://www.michaelpiseno.com/blog/2021/softmax-gradient/
-class CategoricalCrossEntropy():
+class CrossEntropyLoss():
     # def __init__(self)
 
     def __call__(self, Z, y):
         assert isinstance(y, np.ndarray) and y.shape == (1, Z.array.shape[1])
         assert y.dtype == int  # expect indices
-        exp_Z = np.exp(Z.array) 
+        batch_size = Z.array.shape[1]
+        exp_Z = np.exp(Z.array)
         softmax_denom = exp_Z.sum(axis=0, keepdims=True)
-        Z_select = Z.array[y, np.arange(Z.array.shape[1])]
-        loss = (-Z_select + np.log(softmax_denom)).sum(1) # dbl check all
+        Z_select = Z.array[y, np.arange(batch_size)]
+        loss = (-Z_select + np.log(softmax_denom)).mean(axis=1)  # mean instead of sum (default on pytorch)
         res = tp.Scalar(loss, _prev=(Z,))
         # now backward...
 
         def _backward():
             softmax = exp_Z / softmax_denom
-            Z.grad = softmax  # todo
-            Z.grad[y, np.arange(Z.array.shape[1])] -= 1
+            Z.grad = softmax / batch_size  # because mean used in fwd
+            Z.grad[y, np.arange(batch_size)] -= 1 / batch_size  # because mean used in fwd
         res._backward = _backward
         return res
 
@@ -68,7 +70,7 @@ class Sequential(Module):
     def parameters(self):
         return [p for layer in self.layers for p in layer.parameters()]
 
-
+'''
 X = np.random.randn(28 * 28, 500)
 y = np.random.randint(0, 10, size=(1, 500))
 
@@ -83,3 +85,4 @@ Z = model(X)
 loss_fn = CategoricalCrossEntropy()
 loss = loss_fn(Z, y)
 loss.backward()
+'''
