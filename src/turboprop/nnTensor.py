@@ -35,7 +35,7 @@ class Dense(Module):
     #    return f'{neur_type} neuron with {len(self.W)} weights'
 
 
-# gradient calc: https://www.michaelpiseno.com/blog/2021/softmax-gradient/
+# CrossEntropy gradient calc: https://www.michaelpiseno.com/blog/2021/softmax-gradient/
 class CrossEntropyLoss():
     # def __init__(self)
 
@@ -43,9 +43,10 @@ class CrossEntropyLoss():
         assert isinstance(y, np.ndarray) and y.shape == (1, Z.array.shape[1])
         assert y.dtype == int  # expect indices
         batch_size = Z.array.shape[1]
-        exp_Z = np.exp(Z.array)
+        max_val = Z.array.max()
+        exp_Z = np.exp(Z.array - max_val)  # -max_val to avoid overflow 
         softmax_denom = exp_Z.sum(axis=0, keepdims=True)
-        Z_select = Z.array[y, np.arange(batch_size)]
+        Z_select = Z.array[y, np.arange(batch_size)] - max_val
         loss = (-Z_select + np.log(softmax_denom)).mean(axis=1)  # mean instead of sum (default on pytorch)
         res = tp.Scalar(loss, _prev=(Z,))
 
