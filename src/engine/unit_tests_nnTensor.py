@@ -100,24 +100,6 @@ with torch.no_grad():
     b2grad_err = (b2.grad - b2_tp.grad).abs()
     print(f'Are b2 grad different?: {torch.any(b2grad_err > tol)}')
 
-    #print(A1.grad[a1grad_err > tol])
-    #print(A1_tp.grad[a1grad_err > tol])
-    #print(A1_tp.grad[a1grad_err > tol].shape)
-
-    #print(A1.grad)
-    #print(A1_tp.grad)
-    #print(W2_tp.array.T @ Z2_tp.grad)
-    #print('***')
-    #print(Z1.grad)
-    #print(Z1_tp.grad)
-
-
-   
-    #print(W2)
-    #print(W2_tp.array)
-#print(loss_tp.parameters())
-
-# CURRENT BUG: A1 grad is wrong and is equal to Z1 grad, why? probably mem copy issue in building ops
-
-# bug in steps:
-
+#optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate) 
+#optimizer.step()
+#optimizer.zero_grad()

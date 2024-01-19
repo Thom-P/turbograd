@@ -1,5 +1,5 @@
 import numpy as np
-import engine.turboprop as tp
+#import engine.turboprop as tp
 from engine.nnTensor import Dense, Sequential, CrossEntropyLoss
 # import matplotlib.pyplot as plt
 

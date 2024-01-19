@@ -1,4 +1,4 @@
-import turboprop as tp
+import engine.turboprop as tp
 from abc import ABC, abstractmethod
 import numpy as np
 
