@@ -186,6 +186,6 @@ for epoch in range(n_epoch):
     test_loop(X_test, y_test, model, loss_fn)
 
 print('Done!')
-torch.save(model, 'model_1hid_layer_16.pth')
+#torch.save(model, 'model_1hid_layer_16.pth')
 
 # torch.save(model.state_dict(), 'model_weights.pth')

@@ -174,7 +174,7 @@ class Tensor:
         res = Tensor(np.maximum(0, self.array), _prev=(self,))  # in place instead?
 
         def _backward():
-            self.grad = res.grad
+            self.grad += res.grad # A1grad bug was here (needed += or .copy to avoid mem sharing)? 
             self.grad[self.array <= 0] = 0
         res._backward = _backward
         return res
