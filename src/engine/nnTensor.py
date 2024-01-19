@@ -21,11 +21,12 @@ class Dense(Module):
         self.label = label
         #sigma, mu = 2, 0
         #self.weights = tp.Tensor(sigma * np.random.randn(n_out, n_in).astype(np.float32) + mu, label=self.label + 'W')
-        #self.biases = tp.Tensor(np.zeros((n_out, 1)).astype(np.float32), label=self.label + 'b')
-        # need scaling (here follow pytorch default)
+        
+        # need scaling (here follow pytorch default for weights)
         stdv = 1. / np.sqrt(n_in)
         self.weights = tp.Tensor(np.random.uniform(-stdv, stdv, size=(n_out, n_in)).astype(np.float32), label=self.label + 'W')
-        self.biases = tp.Tensor(np.random.uniform(-stdv, stdv, size=(n_out, 1)).astype(np.float32), label=self.label + 'b')
+        self.biases = tp.Tensor(np.zeros((n_out, 1)).astype(np.float32), label=self.label + 'b')
+        #self.biases = tp.Tensor(np.random.uniform(-stdv, stdv, size=(n_out, 1)).astype(np.float32), label=self.label + 'b')
         self.relu = relu
 
     def __call__(self, A):

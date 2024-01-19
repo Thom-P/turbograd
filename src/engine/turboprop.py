@@ -4,6 +4,9 @@
 import math
 import numpy as np
 
+# Because lambda function cannot be pickled
+def do_nothing():
+    return None
 
 class Scalar:
     def __init__(self, value, _prev=(), label='Undefined'):
@@ -13,7 +16,8 @@ class Scalar:
 
         # for auto backprop
         self._prev = _prev
-        self._backward = lambda: None
+        #self._backward = lambda: None
+        self._backward = do_nothing
 
     def __repr__(self):
         return f'Scalar({self.value}), grad={self.grad}'
@@ -134,7 +138,8 @@ class Tensor:
 
         # for auto backprop
         self._prev = _prev
-        self._backward = lambda: None
+        #self._backward = lambda: None
+        self._backward = do_nothing
 
     def __repr__(self):
         return f'Tensor(shape={self.array.shape}, dtype={self.array.dtype})'

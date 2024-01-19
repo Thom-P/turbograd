@@ -1,4 +1,6 @@
 import numpy as np
+import pickle
+
 #import engine.turboprop as tp
 from engine.nnTensor import Dense, Sequential, CrossEntropyLoss
 # import matplotlib.pyplot as plt
@@ -111,14 +113,15 @@ def test_loop(X_test, y_test, model, loss_fn):
 
 
 # Training loop
-#n_epoch = 1000
-n_epoch = 300
+#n_epoch = 300
+n_epoch = 100
 for epoch in range(n_epoch):
     print(f'Epoch #{epoch + 1}:')
     train_loop(X, y, model, loss_fn)
     test_loop(X_test, y_test, model, loss_fn)
 
+# Writing the model to a file using pickle
+fname_model = 'model_1H_16.turbo'
+with open(fname_model, 'wb') as file:
+    pickle.dump(model, file)
 print('Done!')
-#torch.save(model, 'model_1hid_layer_16.pth')
-
-# torch.save(model.state_dict(), 'model_weights.pth')
