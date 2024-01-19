@@ -6,9 +6,10 @@ import numpy as np
 
 
 class Scalar:
-    def __init__(self, value, _prev=()):
+    def __init__(self, value, _prev=(), label='Undefined'):
         self.value = value
         self.grad = 0
+        self.label = label # for debug
 
         # for auto backprop
         self._prev = _prev
@@ -17,6 +18,32 @@ class Scalar:
     def __repr__(self):
         return f'Scalar({self.value}), grad={self.grad}'
 
+    def backward(self):
+        #print(f'backward called on: {self.label}')
+        self.grad = 1
+
+        # DFS build of topological order of nodes
+        visited = set()
+        topo = []
+
+        def build_topo(node):
+            if node in visited:
+                return
+            visited.add(node)
+            for prev_node in node._prev:
+                build_topo(prev_node)
+            topo.append(node)
+        build_topo(self)
+        
+        #print('Built reverse topo order is:')
+        #print([node.label for node in reversed(topo)])
+        
+        # backprop of grad to all _prev variables in reverse topological order
+        for node in reversed(topo):
+            node._backward()
+
+
+    '''
     def __add__(self, other):
         other = other if isinstance(other, Scalar) else Scalar(other)
         res = Scalar(self.value + other.value, _prev=(self, other))
@@ -72,27 +99,8 @@ class Scalar:
             self.grad += res.grad * (1 if self.value >= 0 else 0)
         res._backward = _backward
         return res
-
-    def backward(self):
-        self.grad = 1
-
-        # DFS build of topological order of nodes
-        visited = set()
-        topo = []
-
-        def build_topo(node):
-            if node in visited:
-                return
-            visited.add(node)
-            for prev_node in node._prev:
-                build_topo(prev_node)
-            topo.append(node)
-        build_topo(self)
-
-        # backprop of grad to all _prev variables in reverse topological order
-        for node in reversed(topo):
-            node._backward()
-
+    '''
+    
 
 ''''
 a = Scalar(5.0)
@@ -118,10 +126,11 @@ print(e.grad)
 
 
 class Tensor:
-    def __init__(self, array: np.ndarray, _prev=()):
+    def __init__(self, array: np.ndarray, _prev=(), label='UndefinedTensor'):
         assert isinstance(array, np.ndarray) and array.ndim == 2
         self.array = array
         self.grad = np.zeros(array.shape)
+        self.label=label
 
         # for auto backprop
         self._prev = _prev
@@ -140,9 +149,11 @@ class Tensor:
             other_arr = other
             _prev = (self,)
         assert other_arr.shape[0] == self.array.shape[1]  # ok for matmul
-        res = Tensor(self.array @ other_arr, _prev=_prev)
+        lab = other.label if isinstance(other, Tensor) else 'X'
+        res = Tensor(self.array @ other_arr, _prev=_prev, label=self.label + '@' + lab)
 
         def _backward():
+            #print(f'Calling _backward on {res.label}')
             #self.grad += 1 / other_arr.shape[1] * \
             #    res.grad @ other_arr.T # why norm on coursera?
             self.grad += res.grad @ other_arr.T
@@ -157,9 +168,10 @@ class Tensor:
         assert isinstance(other, Tensor) and other.array.ndim == 2
         assert other.array.shape == self.array.shape \
             or other.array.shape == (self.array.shape[0], 1)
-        res = Tensor(self.array + other.array, _prev=(self, other))
+        res = Tensor(self.array + other.array, _prev=(self, other), label=self.label+'+?')
 
         def _backward():
+            #print(f'Calling _backward on {res.label}')
             self.grad += res.grad
             if other.array.shape[1] == 1:
                 #other.grad += 1 / self.array.shape[1] \
@@ -171,9 +183,10 @@ class Tensor:
         return res
 
     def relu(self):
-        res = Tensor(np.maximum(0, self.array), _prev=(self,))  # in place instead?
+        res = Tensor(np.maximum(0, self.array), _prev=(self,), label='Relu(' + self.label + ')')  # in place instead?
 
         def _backward():
+            #print(f'Calling _backward on {res.label}')
             self.grad += res.grad # A1grad bug was here (needed += or .copy to avoid mem sharing)? 
             self.grad[self.array <= 0] = 0
         res._backward = _backward

@@ -10,16 +10,22 @@ class Module(ABC):
 
     # reset gradients to zeros (to do after each gradient descent step)
     def zero_grad(self):
+        #print(f'Calling zero grad on {self.label}')
         for p in self.parameters():
             p.grad = np.zeros(p.array.shape)
 
 
 # Dense Layer (Linear + optional ReLU)
 class Dense(Module):
-    def __init__(self, n_in, n_out, relu=True):
-        sigma, mu = 2, 0
-        self.weights = tp.Tensor(sigma * np.random.randn(n_out, n_in) + mu)
-        self.biases = tp.Tensor(np.zeros((n_out, 1)))
+    def __init__(self, n_in, n_out, relu=True, label='UndefLayer'):
+        self.label = label
+        #sigma, mu = 2, 0
+        #self.weights = tp.Tensor(sigma * np.random.randn(n_out, n_in).astype(np.float32) + mu, label=self.label + 'W')
+        #self.biases = tp.Tensor(np.zeros((n_out, 1)).astype(np.float32), label=self.label + 'b')
+        # need scaling (here follow pytorch default)
+        stdv = 1. / np.sqrt(n_in)
+        self.weights = tp.Tensor(np.random.uniform(-stdv, stdv, size=(n_out, n_in)).astype(np.float32), label=self.label + 'W')
+        self.biases = tp.Tensor(np.random.uniform(-stdv, stdv, size=(n_out, 1)).astype(np.float32), label=self.label + 'b')
         self.relu = relu
 
     def __call__(self, A):
@@ -47,9 +53,10 @@ class CrossEntropyLoss():
         softmax_denom = exp_Z.sum(axis=0, keepdims=True)
         Z_select = Z.array[y, np.arange(batch_size)] - max_vals
         loss = (-Z_select + np.log(softmax_denom)).mean(axis=1)  # mean instead of sum (default on pytorch)
-        res = tp.Scalar(loss, _prev=(Z,))
+        res = tp.Scalar(loss, _prev=(Z,), label='crossLoss')
 
         def _backward():
+            #print('Calling _backward on crossLoss')
             softmax = exp_Z / softmax_denom
             Z.grad = softmax
             Z.grad[y, np.arange(batch_size)] -= 1
@@ -61,8 +68,9 @@ class CrossEntropyLoss():
 
 
 class Sequential(Module):
-    def __init__(self, layers):
+    def __init__(self, layers, label='myModel'):
         self.layers = layers
+        self.label = label
 
     def __call__(self, x):
         for layer in self.layers:

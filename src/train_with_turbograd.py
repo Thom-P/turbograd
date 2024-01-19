@@ -103,6 +103,7 @@ def test_loop(X_test, y_test, model, loss_fn):
     for batch in range(n_batch):
         z_test_pred = model(X_test[batch].T)
         test_loss += loss_fn(z_test_pred, y_test[batch].reshape(1, -1)).value.squeeze()
+        
         correct += (z_test_pred.array.argmax(axis=0) == y_test[batch]).sum()
     test_loss /= n_batch
     correct /= n_test
@@ -110,7 +111,8 @@ def test_loop(X_test, y_test, model, loss_fn):
 
 
 # Training loop
-n_epoch = 1000
+#n_epoch = 1000
+n_epoch = 300
 for epoch in range(n_epoch):
     print(f'Epoch #{epoch + 1}:')
     train_loop(X, y, model, loss_fn)
