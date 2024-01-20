@@ -77,7 +77,7 @@ class CrossEntropyLoss():
     """
     def __call__(self, Z, y):
         assert isinstance(y, np.ndarray) and y.shape == (1, Z.array.shape[1])
-        assert y.dtype == int  # expect indices
+        assert y.dtype == np.int32  # expect indices
         batch_size = Z.array.shape[1]
         max_vals = Z.array.max(axis=0, keepdims=True)
         exp_Z = np.exp(Z.array - max_vals)  # - max_vals to avoid exp overflow
