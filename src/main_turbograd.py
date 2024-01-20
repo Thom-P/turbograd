@@ -1,10 +1,11 @@
 import tkinter as tk
 import tkinter.font as font
 from PIL import Image, ImageTk, ImageDraw
-import numpy as np
 import pickle
 
-from engine.nnTensor import Dense, Sequential, CrossEntropyLoss
+import numpy as np
+
+from turbograd.layers import Dense, Sequential, CrossEntropyLoss
 
 #model = Sequential([
 #    Dense(28 * 28, 16),
@@ -12,7 +13,7 @@ from engine.nnTensor import Dense, Sequential, CrossEntropyLoss
 #    ])
 
 # Reading the model back from the file
-with open('model_1H_16.turbo', 'rb') as fmodel:
+with open('model_1H_32.turbo', 'rb') as fmodel:
     model = pickle.load(fmodel)
 
 # model = torch.load('model2.pth')

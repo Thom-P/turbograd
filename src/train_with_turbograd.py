@@ -1,9 +1,9 @@
-import numpy as np
 import pickle
 
-#import engine.turboprop as tp
-from engine.nnTensor import Dense, Sequential, CrossEntropyLoss
-# import matplotlib.pyplot as plt
+import numpy as np
+
+from turbograd.layers import Dense, Sequential, CrossEntropyLoss
+
 
 # loading MNIST from bin files directly
 with open('../MNIST_dataset/MNIST/raw/train-images-idx3-ubyte', 'rb') as f:

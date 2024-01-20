@@ -1,5 +1,4 @@
-import engine.turboprop as tp
-from engine.nnTensor import Dense, Sequential, CrossEntropyLoss
+from turbograd.layers import Dense, Sequential, CrossEntropyLoss
 import numpy as np
 import torch
 torch.set_printoptions(precision=6)

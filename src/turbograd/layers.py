@@ -1,6 +1,7 @@
-import engine.turboprop as tp
 from abc import ABC, abstractmethod
 import numpy as np
+
+import turbograd.wrappers as tw
 
 
 class Module(ABC):
@@ -24,8 +25,8 @@ class Dense(Module):
         
         # need scaling (here follow pytorch default for weights)
         stdv = 1. / np.sqrt(n_in)
-        self.weights = tp.Tensor(np.random.uniform(-stdv, stdv, size=(n_out, n_in)).astype(np.float32), label=self.label + 'W')
-        self.biases = tp.Tensor(np.zeros((n_out, 1)).astype(np.float32), label=self.label + 'b')
+        self.weights = tw.Tensor(np.random.uniform(-stdv, stdv, size=(n_out, n_in)).astype(np.float32), label=self.label + 'W')
+        self.biases = tw.Tensor(np.zeros((n_out, 1)).astype(np.float32), label=self.label + 'b')
         #self.biases = tp.Tensor(np.random.uniform(-stdv, stdv, size=(n_out, 1)).astype(np.float32), label=self.label + 'b')
         self.relu = relu
 
@@ -54,7 +55,7 @@ class CrossEntropyLoss():
         softmax_denom = exp_Z.sum(axis=0, keepdims=True)
         Z_select = Z.array[y, np.arange(batch_size)] - max_vals
         loss = (-Z_select + np.log(softmax_denom)).mean(axis=1).squeeze()  # mean instead of sum (default on pytorch)
-        res = tp.Scalar(loss, _prev=(Z,), label='crossLoss')
+        res = tw.Scalar(loss, _prev=(Z,), label='crossLoss')
 
         def _backward():
             #print('Calling _backward on crossLoss')
