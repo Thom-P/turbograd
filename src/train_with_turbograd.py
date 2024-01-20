@@ -3,10 +3,21 @@ import pickle
 from turbograd.layers import Dense, Sequential, CrossEntropyLoss
 from data_loader import load_data
 
-n_train = 60_000
-n_test = 10_000
-batch_size = 500  # use a divisor of n_train and n_test
+# Parameters
+n_train = 60_000  # number of images in training set
+n_test = 10_000  # number of images in test set
+batch_size = 500  # use a common divisor of n_train and n_test
+learning_rate = 1e-1
+loss_fn = CrossEntropyLoss()
 
+# Define a 2 layer model with 32 hidden units
+model = Sequential([
+    Dense(28 * 28, 32),
+    Dense(32, 10, relu=False)
+    ])
+# print(model)
+
+# Load and prepare dataset
 train_images_file = '../MNIST_dataset/MNIST/raw/train-images-idx3-ubyte'
 train_labels_file = '../MNIST_dataset/MNIST/raw/train-labels-idx1-ubyte'
 
@@ -27,17 +38,6 @@ y = train_labels.reshape([-1, batch_size]).astype('int32')
 X_test = test_images.reshape([-1, batch_size,
                               28 * 28]).astype('float32') / 255.
 y_test = test_labels.reshape([-1, batch_size]).astype('int32')
-
-# Define a 2 layer model with 32 hidden units
-model = Sequential([
-    Dense(28 * 28, 32),
-    Dense(32, 10, relu=False)
-    ])
-# print(model)
-
-# Params
-learning_rate = 1e-1
-loss_fn = CrossEntropyLoss()
 
 
 def train_loop(X, y, model, loss_fn):
@@ -90,7 +90,7 @@ for epoch in range(n_epoch):
     train_loop(X, y, model, loss_fn)
     test_loop(X_test, y_test, model, loss_fn)
 
-# Writing the model to a file using pickle
+# Save the model to a file
 fname_model = 'model_1H_32.turbo'
 with open(fname_model, 'wb') as file:
     pickle.dump(model, file)
