@@ -47,8 +47,9 @@ class Dense(Module):
 
     def __repr__(self):
         layer_type = 'Linear + ReLU' if self.relu else 'Linear'
-        return (f'Dense {layer_type} layer {self.label},'
-                f'size = {self.weights.shape}')
+        size = self.weights.array.shape
+        size_str = f'({size[1]} -> {size[0]})'
+        return f'Dense {layer_type} {size_str}'
 
 
 class Sequential(Module):
@@ -64,6 +65,10 @@ class Sequential(Module):
 
     def parameters(self):
         return [p for layer in self.layers for p in layer.parameters()]
+
+    def __repr__(self):
+        layer_info = '\n'.join(str(layer) for layer in self.layers) + '\n'
+        return 'Sequential model:\n' + layer_info
 
 
 # CrossEntropy gradient calculation:

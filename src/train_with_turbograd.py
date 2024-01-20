@@ -15,7 +15,7 @@ model = Sequential([
     Dense(28 * 28, 32),
     Dense(32, 10, relu=False)
     ])
-# print(model)
+print(model)
 
 # Load and prepare dataset
 train_images_file = '../MNIST_dataset/MNIST/raw/train-images-idx3-ubyte'
