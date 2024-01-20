@@ -53,7 +53,7 @@ class CrossEntropyLoss():
         exp_Z = np.exp(Z.array - max_vals)  # -max_vals to avoid overflow 
         softmax_denom = exp_Z.sum(axis=0, keepdims=True)
         Z_select = Z.array[y, np.arange(batch_size)] - max_vals
-        loss = (-Z_select + np.log(softmax_denom)).mean(axis=1)  # mean instead of sum (default on pytorch)
+        loss = (-Z_select + np.log(softmax_denom)).mean(axis=1).squeeze()  # mean instead of sum (default on pytorch)
         res = tp.Scalar(loss, _prev=(Z,), label='crossLoss')
 
         def _backward():

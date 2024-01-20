@@ -66,8 +66,8 @@ y_test = mnist_test_labels.reshape([-1, batch_size]).astype('int64') # just to p
 # ***************** Define model
 
 model = Sequential([
-    Dense(28 * 28, 16),
-    Dense(16, 10, relu=False)
+    Dense(28 * 28, 32),
+    Dense(32, 10, relu=False)
     ])
 
 #print(model)
@@ -121,7 +121,7 @@ for epoch in range(n_epoch):
     test_loop(X_test, y_test, model, loss_fn)
 
 # Writing the model to a file using pickle
-fname_model = 'model_1H_16.turbo'
+fname_model = 'model_1H_32.turbo'
 with open(fname_model, 'wb') as file:
     pickle.dump(model, file)
 print('Done!')

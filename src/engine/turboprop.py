@@ -1,29 +1,30 @@
-# import numpy as np
-# Build an auto backprop package from Numpy,
-# following (class Scalar) and extending (class Tensor) on the tinygrad tutorial by A. Karpathy
-import math
+"""The Scalar and Tensor classes for turbograd are wrappers around numpy scalar
+and 2D arrays. The objects keep a reference of the (_prev) variables used in
+their computation to form a computational graph. Their _backward method is used
+to backpropagate the gradient through the graph.
+"""
 import numpy as np
 
-# Because lambda function cannot be pickled
-def do_nothing():
-    return None
 
 class Scalar:
-    def __init__(self, value, _prev=(), label='Undefined'):
+    """Wrapper around numpy float32 scalar. At the moment, Scalar is only used
+    as the endpoint of the computational graph (cross entropy loss). Its 
+    backward method is called to initiate the gradient backpropagation.
+    """
+    def __init__(self, value, _prev=(), label='n/a'):
+        assert value.ndim == 0 and value.dtype == np.float32
         self.value = value
         self.grad = 0
-        self.label = label # for debug
+        self.label = label  # for debug
 
-        # for auto backprop
+        # For backprop
         self._prev = _prev
-        #self._backward = lambda: None
-        self._backward = do_nothing
+        self._backward = None
 
     def __repr__(self):
-        return f'Scalar({self.value}), grad={self.grad}'
+        return f'TgScalar({self.value}), grad={self.grad}'
 
     def backward(self):
-        #print(f'backward called on: {self.label}')
         self.grad = 1
 
         # DFS build of topological order of nodes
@@ -38,111 +39,34 @@ class Scalar:
                 build_topo(prev_node)
             topo.append(node)
         build_topo(self)
-        
-        #print('Built reverse topo order is:')
-        #print([node.label for node in reversed(topo)])
-        
-        # backprop of grad to all _prev variables in reverse topological order
+
+        # print('Built reverse topo order is:')
+        # print([node.label for node in reversed(topo)])
+
+        # Backprop of grad through the compute graph in rev. topological order
         for node in reversed(topo):
-            node._backward()
-
-
-    '''
-    def __add__(self, other):
-        other = other if isinstance(other, Scalar) else Scalar(other)
-        res = Scalar(self.value + other.value, _prev=(self, other))
-
-        def _backward():
-            self.grad += res.grad
-            other.grad += res.grad
-        res._backward = _backward
-        return res
-
-    def __radd__(self, other):
-        return self + other
-
-    def __sub__(self, other):
-        return self + (-other)
-
-    def __mul__(self, other):
-        other = other if isinstance(other, Scalar) else Scalar(other)
-        res = Scalar(self.value * other.value, _prev=(self, other))
-
-        def _backward():
-            self.grad += res.grad * other.value
-            other.grad += res.grad * self.value
-        res._backward = _backward
-        return res
-
-    def __neg__(self):
-        return self * -1
-
-    def __pow__(self, pow):
-        res = Scalar(self.value ** pow, _prev=(self,))
-
-        def _backward():
-            self.grad += res.grad * pow * (self.value ** (pow - 1))
-        res._backward = _backward
-        return res
-
-    def __truediv__(self, other):
-        return self * (other ** -1)
-
-    def log(self):
-        res = Scalar(math.log(self.value), _prev=(self,))
-
-        def _backward():
-            self.grad += res.grad / self.value
-        res._backward = _backward
-        return res
-
-    def relu(self):
-        res = Scalar(max(0, self.value), _prev=(self,))
-
-        def _backward():
-            self.grad += res.grad * (1 if self.value >= 0 else 0)
-        res._backward = _backward
-        return res
-    '''
-    
-
-''''
-a = Scalar(5.0)
-print(a)
-
-b = Scalar(-2.0)
-print(b)
-
-c = a + b
-print(c)
-
-d = Scalar(4)
-print(d)
-
-e = c * d
-e.backward()
-print(a.grad)
-print(b.grad)
-print(c.grad)
-print(d.grad)
-print(e.grad)
-'''
+            if node._backward is not None:
+                node._backward()
 
 
 class Tensor:
-    def __init__(self, array: np.ndarray, _prev=(), label='UndefinedTensor'):
+    """Wrapper around numpy 2D arrays. Used for the matrix operations of the
+    forward propagation and for building the corresponding computational
+    graph. Each matrix operation contains a _backward method to backpropagate
+    the gradient
+    """
+    def __init__(self, array: np.ndarray, _prev=(), label='n/a'):
         assert isinstance(array, np.ndarray) and array.ndim == 2
         self.array = array
         self.grad = np.zeros(array.shape)
-        self.label=label
+        self.label = label
 
-        # for auto backprop
+        # For backprop
         self._prev = _prev
-        #self._backward = lambda: None
-        self._backward = do_nothing
+        self._backward = None
 
     def __repr__(self):
-        return f'Tensor(shape={self.array.shape}, dtype={self.array.dtype})'
+        return f'TgTensor(shape={self.array.shape}, dtype={self.array.dtype})'
 
     def __matmul__(self, other):
         assert (isinstance(other, np.ndarray) and other.ndim == 2) \
@@ -153,18 +77,14 @@ class Tensor:
         else:
             other_arr = other
             _prev = (self,)
-        assert other_arr.shape[0] == self.array.shape[1]  # ok for matmul
-        lab = other.label if isinstance(other, Tensor) else 'X'
-        res = Tensor(self.array @ other_arr, _prev=_prev, label=self.label + '@' + lab)
+        assert other_arr.shape[0] == self.array.shape[1]  # for matmul
+        label = other.label if isinstance(other, Tensor) else 'X'
+        res = Tensor(self.array @ other_arr, _prev=_prev,
+                     label=self.label + '@' + label)
 
         def _backward():
-            #print(f'Calling _backward on {res.label}')
-            #self.grad += 1 / other_arr.shape[1] * \
-            #    res.grad @ other_arr.T # why norm on coursera?
             self.grad += res.grad @ other_arr.T
             if isinstance(other, Tensor):
-                #other.grad += 1 / self.array.shape[0] * \
-                #    self.array.T @ res.grad  # why norm on coursera?
                 other.grad += self.array.T @ res.grad
         res._backward = _backward
         return res
@@ -173,14 +93,12 @@ class Tensor:
         assert isinstance(other, Tensor) and other.array.ndim == 2
         assert other.array.shape == self.array.shape \
             or other.array.shape == (self.array.shape[0], 1)
-        res = Tensor(self.array + other.array, _prev=(self, other), label=self.label+'+?')
+        res = Tensor(self.array + other.array, _prev=(self, other),
+                     label=self.label + '+' + other.label)
 
         def _backward():
-            #print(f'Calling _backward on {res.label}')
             self.grad += res.grad
             if other.array.shape[1] == 1:
-                #other.grad += 1 / self.array.shape[1] \
-                #    * res.grad.sum(axis=1, keepdims=True)
                 other.grad += res.grad.sum(axis=1, keepdims=True)
             else:
                 other.grad += res.grad
@@ -188,71 +106,11 @@ class Tensor:
         return res
 
     def relu(self):
-        res = Tensor(np.maximum(0, self.array), _prev=(self,), label='Relu(' + self.label + ')')  # in place instead?
+        res = Tensor(np.maximum(0, self.array), _prev=(self,),
+                     label=f'Relu({self.label})')
 
         def _backward():
-            #print(f'Calling _backward on {res.label}')
-            self.grad += res.grad # A1grad bug was here (needed += or .copy to avoid mem sharing)? 
+            self.grad += res.grad
             self.grad[self.array <= 0] = 0
         res._backward = _backward
         return res
-    
-    '''
-    def __mul__(self, other):
-        assert isinstance(other, float)  # limited to float atm
-        self.array = self.array * other  # no need to track op i think(?)
-        return self
-
-    def __truediv__(self, other):
-        assert isinstance(other, Tensor)
-        res = Tensor(self.array / other.array, _prev=(self, other))
-
-        def _backward():
-            self.grad = res.grad / other.array
-            other.grad = res.grad * -self.array / (other.array ** 2)
-        res._backward = _backward
-        return res
-
-    def __neg__(self):
-        self.array = -self.array  # idem
-        return self
-
-    def log(self):
-        res = Tensor(np.log(self.array), _prev=(self,))
-
-        def _backward():
-            self.grad = res.grad / self.array
-        res._backward = _backward
-        return res
-
-    def exp(self):
-        res = Tensor(np.exp(self.array), _prev=(self,))
-
-        def _backward():
-            self.grad = res.grad * np.exp(self.array)
-        res._backward = _backward
-        return res
-    '''
-
-
-'''
-A = np.random.rand(30, 40)
-B = np.random.rand(40, 60)
-B_bad = np.random.rand(39, 60) 
-C1 = np.random.rand(30, 60)  
-C2 = np.random.rand(30, 1)  
-tA = Tensor(A)
-tB = Tensor(B)
-tBb = Tensor(B_bad)
-tC1 = Tensor(C1)
-tC2 = Tensor(C2)
-
-tD = tA @ tB + tC2
-print(tD)
-
-expo = tA.exp()
-expo = (-tA).exp()
-logo = tB.log()
-relo = tC1.relu()
-divo = tC1 * 3. / tC2
-'''
