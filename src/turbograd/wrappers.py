@@ -8,7 +8,7 @@ import numpy as np
 
 class Scalar:
     """Wrapper around numpy float32 scalar. At the moment, Scalar is only used
-    as the endpoint of the computational graph (cross entropy loss). Its 
+    as the endpoint of the computational graph (cross entropy loss). Its
     backward method is called to initiate the gradient backpropagation.
     """
     def __init__(self, value, _prev=(), label='n/a'):
@@ -25,7 +25,7 @@ class Scalar:
         return f'TgScalar({self.value}), grad={self.grad}'
 
     def backward(self):
-        self.grad = 1
+        self.grad = 1.
 
         # DFS build of topological order of nodes
         visited = set()
@@ -57,8 +57,9 @@ class Tensor:
     """
     def __init__(self, array: np.ndarray, _prev=(), label='n/a'):
         assert isinstance(array, np.ndarray) and array.ndim == 2
+        assert array.dtype == np.float32
         self.array = array
-        self.grad = np.zeros(array.shape)
+        self.grad = np.zeros(array.shape, dtype=np.float32)
         self.label = label
 
         # For backprop
