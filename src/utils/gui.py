@@ -15,8 +15,8 @@ class MyWindow:
         self.canvas = tk.Canvas(root, width=400, height=400)
         self.imageContainer = self.canvas.create_image(0, 0, anchor="nw",
                                                        image=self.tkImage)
-        self.msg = tk.StringVar(value='Detected char: ?')
-        self.label = tk.Label(root, textvariable=self.msg, 
+        self.msg = tk.StringVar(value='Detected char:  ')
+        self.label = tk.Label(root, textvariable=self.msg,
                               font=font.Font(size=30))
 
         self.line = []
@@ -48,7 +48,7 @@ class MyWindow:
         self.draw = ImageDraw.Draw(self.image)
         self.tkImage = ImageTk.PhotoImage(self.image)
         self.canvas.itemconfig(self.imageContainer, image=self.tkImage)
-        self.msg.set('Detected char: ?')
+        self.msg.set('Detected char:  ')
 
     def doneStroke(self, event):
         self.detect_fn(self.image, self.msg)
