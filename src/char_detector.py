@@ -4,7 +4,7 @@ import numpy as np
 from PIL import Image, ImageFilter, ImageOps
 import tkinter as tk
 
-from gui import MyWindow
+from utils.gui import MyWindow
 
 # Build dictionary for class index -> ascii conversion
 indices_keys = list(range(47))
@@ -13,7 +13,7 @@ ascii_values = list(range(48, 58)) + list(range(65, 91)) \
 ascii_from_class = dict(zip(indices_keys, ascii_values))
 
 # Reading the trained model from file
-with open('emnist_model_1h_128.tg', 'rb') as fmodel:
+with open('model_1h_128.tg', 'rb') as fmodel:
     model = pickle.load(fmodel)
 # need eval mode
 

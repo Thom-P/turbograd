@@ -1,7 +1,7 @@
 import pickle
 
 from turbograd.layers import Dense, Sequential, CrossEntropyLoss
-from data_loader import load_data
+from utils.data_loader import load_data
 
 # Parameters
 n_train = 112_800  # number of images in training set
@@ -92,7 +92,7 @@ for epoch in range(n_epoch):
     test_loop(X_test, y_test, model, loss_fn)
 
 # Save the model to a file
-fname_model = 'emnist_model_1h_128.tg'
+fname_model = 'model_1h_128.tg'
 with open(fname_model, 'wb') as file:
     pickle.dump(model, file)
 print('Done!')
