@@ -1,25 +1,15 @@
+import pickle
+
 import tkinter as tk
 import tkinter.font as font
 from PIL import Image, ImageTk, ImageDraw
-import pickle
-
 import numpy as np
 
-from turbograd.layers import Dense, Sequential, CrossEntropyLoss
-
-#model = Sequential([
-#    Dense(28 * 28, 16),
-#    Dense(16, 10, relu=False)
-#    ])
 
 # Reading the model back from the file
 with open('model_1H_32.turbo', 'rb') as fmodel:
     model = pickle.load(fmodel)
-
-# model = torch.load('model2.pth')
-#model = torch.load('model_1hid_layer_16.pth')
-
-#need eval mode
+# need eval mode
 
 # Input preprocess following MNIST procedure
 def preprocess_image_arr(im_arr):
@@ -58,9 +48,6 @@ def preprocess_image_arr(im_arr):
     arr_40 = np.zeros((40, 40), dtype='uint8')
     # cm is at ind [20, 20] in arr40
     arr_40[20 - row_cm:20 - row_cm + 20, 20 - col_cm:20 - col_cm + 20] = arr_20
-
-    # im_28 = Image.fromarray(arr_40[(40 - 28) // 2:(40 - 28) // 2 + 28, \
-    #    (40 - 28) // 2:(40 - 28) // 2 + 28], mode='L')
 
     # cm at ind 14 in arr_28
     i_start = (40 - 28) // 2
@@ -128,9 +115,6 @@ class MyWindow:
             return
         arr_28x28 = preprocess_image_arr(arr)
         x = arr_28x28.reshape(28 * 28, 1).astype(np.float32) / 255.
-        #X = torch.from_numpy(arr_28x28) / 255
-        #X = X[None, :]  # add axis
-
         z_pred = model(x)
         # print(z_pred)
         ind_max = z_pred.array.argmax()
