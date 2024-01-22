@@ -59,9 +59,9 @@ def train_loop(X, y, model, loss_fn):
         for p in model.parameters():
             p.array -= learning_rate * p.grad
 
-        if (batch + 1) % 20 == 0:
-            loss = loss.value.item()
-            print(f'Batch: {batch + 1} - loss: {loss:>7f}')
+        # if (batch + 1) % 20 == 0:
+        #     loss = loss.value.item()
+        #     print(f'Batch: {batch + 1} - loss: {loss:>7f}')
 
 
 def test_loop(X_test, y_test, model, loss_fn):
@@ -79,7 +79,7 @@ def test_loop(X_test, y_test, model, loss_fn):
         correct += (z_test_pred.array.argmax(axis=0) == y_test[batch]).sum()
     test_loss /= n_batch
     correct /= n_test
-    print(f'Test Error: \nAccuracy: {(100 * correct):>0.1f}%,'
+    print(f'Test Error: \nAccuracy: {(100 * correct):>0.1f}%, '
           f'Avg loss: {test_loss:>8f} \n')
 
 
@@ -91,7 +91,7 @@ for epoch in range(n_epoch):
     test_loop(X_test, y_test, model, loss_fn)
 
 # Save the model to a file
-fname_model = 'model_1H_32.turbo'
-with open(fname_model, 'wb') as file:
-    pickle.dump(model, file)
+#fname_model = 'model_1H_32.turbo'
+#with open(fname_model, 'wb') as file:
+#    pickle.dump(model, file)
 print('Done!')
