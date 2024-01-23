@@ -43,13 +43,13 @@ Copy the four extracted files at the root of the _EMNIST_dataset_ folder of the 
 ### Training the model
 ```sh
 cd src
-python -m train_model.py
+python train_model.py
 ```
 The training over 50 epochs should take around a minute on a laptop and should achieve an accuracy of ~83%.
 
 ### Running the detector:
 ```sh
-python -m char_detector.py
+python char_detector.py
 ```
 Note that the detector was trained on samples from american writers only. For the digits, this implies that the detector will fail to recognize some digits written in other country styles (see the image below [[source]](https://www.youtube.com/watch?v=Hd_b8WiXTHM&ab_channel=Coopos)).
 
