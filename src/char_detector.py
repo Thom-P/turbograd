@@ -16,7 +16,7 @@ ascii_from_class = dict(zip(indices_keys, ascii_values))
 # Reading the trained model from file
 with open('model_1h_128.tg', 'rb') as fmodel:
     model = pickle.load(fmodel)
-# need eval mode
+# todo: switch to eval mode when feature added
 
 
 # Preprocess image and detect char
