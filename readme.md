@@ -25,7 +25,7 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-Download the EMNIST training and testing sets using the following bash script:
+Download the EMNIST training and testing sets (~560 MB) using the following bash script:
 ```sh
 bash download_dataset.sh
 ```
@@ -51,13 +51,13 @@ The training over 50 epochs should take around a minute on a laptop and should a
 ```sh
 python char_detector.py
 ```
-Note that the detector was trained on samples from american writers only. For the digits, this implies that the detector will fail to recognize some digits written in other country styles (see the image below [[source]](https://www.youtube.com/watch?v=Hd_b8WiXTHM&ab_channel=Coopos)).
+Note that the model was trained on samples from american writers only. For the digits, this implies that the detector will fail to recognize some digits written in other country styles (see the image below [[source]](https://www.youtube.com/watch?v=Hd_b8WiXTHM&ab_channel=Coopos)).
 
 <img src="screenshots/us_numbers.png" width="400"/>
 
 For the letters, the non-cursive style was mainly used in the training set and is thus better recognized (see some training examples below).
 
-TODO ADD SAMPLE IMAGE
+<img src="screenshots/train_set_samples.png" width="800"/>
 
 ## Turbograd: an auto-differentiation engine built from Numpy 
 This part of the project was largely influenced by the [_micrograd_](https://github.com/karpathy/micrograd) engine and accompanying [tutorial video](https://www.youtube.com/watch?v=VMj-3S1tku0&ab_channel=AndrejKarpathy) [_[Karpathy, 2020]_](#3). The main objective was to understand the auto-differentiation technique at the core of many deep learning frameworks such as _Pytorch_ and _TensorFlow_. Another objective was to create a sufficiently efficient engine to use it on a "non-trivial" dataset. The _micrograd_ engine is based on a scalar implementation of individual neurons and performs all matrix operations using explicit for loops in Python. While this implementation is very interesting for educational purposes, the engine runs dramatically slow for any practical application. The idea of _turbograd_ was thus to adapt the _micrograd_ approach to matrix formalism using _Numpy_ as the underlying library for fast linear algebra operations. The resulting engine can actually run at a decent speed, making it possible to train a shallow neural network model on the _EMNIST_ dataset in under a minute on a laptop cpu.
