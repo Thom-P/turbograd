@@ -1,7 +1,7 @@
 #!/bin/bash
 
 data_dir='./EMNIST_dataset'
-curl https://www.itl.nist.gov/iaui/vip/cs_links/EMNIST/gzip.zip --output "$data_dir/gzip.zip" 
+curl https://biometrics.nist.gov/cs_links/EMNIST/gzip.zip --output "$data_dir/gzip.zip" 
 FILES="emnist-balanced-train-images-idx3-ubyte.gz
        emnist-balanced-test-images-idx3-ubyte.gz
        emnist-balanced-train-labels-idx1-ubyte.gz

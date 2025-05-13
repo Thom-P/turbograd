@@ -29,7 +29,7 @@ Download the EMNIST training and testing sets (~560 MB) using the following bash
 ```sh
 bash download_dataset.sh
 ```
-Alternatively, you can manually download the EMNIST dataset [here](https://www.nist.gov/itl/products-and-services/emnist-dataset), choosing binary format as the original MNIST dataset. Extract the main gzip folder and then extract the four following archives:
+Alternatively, you can manually download the EMNIST dataset [here](https://biometrics.nist.gov/cs_links/EMNIST/gzip.zip), choosing binary format as the original MNIST dataset. Extract the main gzip folder and then extract the four following archives:
 > emnist-balanced-train-images-idx3-ubyte.gz
 >
 > emnist-balanced-test-images-idx3-ubyte.gz
