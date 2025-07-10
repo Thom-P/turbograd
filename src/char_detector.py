@@ -36,7 +36,7 @@ def detect(image, msg):
 
     # EMNIST images are transposed compared to MNIST
     im_crop = crop_image_array(arr).T
-    im_norm = Image.fromarray(im_crop, mode='L')
+    im_norm = Image.fromarray(im_crop)
     # Add 2 pixel border
     im_norm = ImageOps.expand(im_norm, border=2, fill=0)
     # Downsample to 28x28 image
